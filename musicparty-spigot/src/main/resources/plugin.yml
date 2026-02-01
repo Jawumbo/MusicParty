@@ -1,0 +1,22 @@
+name: "${plugin.name}"
+description: "${project.description}"
+
+main: "${plugin.class.main}"
+version: "${project.version}"
+api-version: "${plugin.version.api}"
+
+website: "${plugin.website}"
+authors: ${plugin.authors}
+
+commands:
+  musicparty:
+    description: Music quiz plugin main command
+    permission: musicparty.use
+    usage: /<command> [help|join|leave]
+    aliases:
+      - mp
+
+permissions:
+  musicparty.use:
+    description: Allows basic usage of the MusicParty plugin
+    default: op
