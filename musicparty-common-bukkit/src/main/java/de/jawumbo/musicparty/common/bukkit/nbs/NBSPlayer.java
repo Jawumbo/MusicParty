@@ -1,5 +1,6 @@
 package de.jawumbo.musicparty.common.bukkit.nbs;
 
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
 import de.jawumbo.musicparty.common.bukkit.util.NBSFile;
 import de.jawumbo.musicparty.common.bukkit.util.NBSLocation;
 import org.bukkit.Location;
@@ -16,12 +17,23 @@ public class NBSPlayer extends BukkitRunnable {
     private final NBSFile nbs;
     private final List<UUID> audience;
 
-    private double nbsTickCounter = 0;
-    private int lastPlayedTick = -1;
-    private int loopsDone = 0;
+    private double nbsTickCounter;
+    private int lastPlayedTick;
+    private int loopsDone;
 
-    public NBSPlayer(NBSFile nbs, List<UUID> audience, JavaPlugin javaPlugin) {
+    public NBSPlayer(NBSFile nbs, List<UUID> audience, JavaPlugin javaPlugin, ConfigManager configManager) {
         this.javaPlugin = javaPlugin;
+
+        int startOffsetSeconds = configManager.getConfig().settings().defaultStartOffsetSeconds();
+        double startTickDouble = startOffsetSeconds * (nbs.tempo / 100.0);
+        int startTick = (int) Math.floor(startTickDouble);
+
+        if (startTick < 0) startTick = 0;
+        if (startTick > nbs.songLength) startTick = nbs.songLength;
+
+        this.nbsTickCounter = startTick;
+        this.lastPlayedTick = startTick - 1;
+
         this.nbs = nbs;
         this.audience = audience;
     }

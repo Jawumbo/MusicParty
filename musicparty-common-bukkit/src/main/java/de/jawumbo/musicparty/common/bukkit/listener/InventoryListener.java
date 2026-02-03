@@ -4,6 +4,7 @@ import de.jawumbo.musicparty.common.bukkit.game.Game;
 import de.jawumbo.musicparty.common.bukkit.game.SingleplayerGame;
 import de.jawumbo.musicparty.common.bukkit.inventoryholder.SingleplayerResultInventoryHolder;
 import de.jawumbo.musicparty.common.bukkit.inventoryholder.SongChooseInventoryHoler;
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
 import de.jawumbo.musicparty.common.bukkit.manager.GameManager;
 import de.jawumbo.musicparty.common.bukkit.util.NBSFile;
 import org.bukkit.entity.HumanEntity;
@@ -22,10 +23,12 @@ import java.util.Objects;
 public class InventoryListener implements Listener {
 
     private final JavaPlugin javaPlugin;
+    private final ConfigManager configManager;
     private final GameManager gameManager;
 
-    public InventoryListener(JavaPlugin javaPlugin, GameManager gameManager) {
+    public InventoryListener(JavaPlugin javaPlugin, ConfigManager configManager, GameManager gameManager) {
         this.javaPlugin = javaPlugin;
+        this.configManager = configManager;
         this.gameManager = gameManager;
         javaPlugin.getServer().getPluginManager().registerEvents(this, javaPlugin);
     }
@@ -60,7 +63,7 @@ public class InventoryListener implements Listener {
 
         if (game instanceof SingleplayerGame singleplayerGame) {
             game.getCurrentTask().cancel();
-            humanEntity.openInventory(new SingleplayerResultInventoryHolder(humanEntity.getUniqueId(), this.javaPlugin, singleplayerGame).getInventory());
+            humanEntity.openInventory(new SingleplayerResultInventoryHolder(humanEntity.getUniqueId(), this.javaPlugin, this.configManager, singleplayerGame).getInventory());
         }
     }
 

@@ -1,8 +1,9 @@
 package de.jawumbo.musicparty.common.bukkit.inventoryholder;
 
 import de.jawumbo.musicparty.common.bukkit.game.Game;
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
+import de.jawumbo.musicparty.common.bukkit.util.ConfigYML;
 import de.jawumbo.musicparty.common.bukkit.util.NBSFile;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -23,39 +24,40 @@ public class SongChooseInventoryHoler implements InventoryHolder {
 
     public final static NamespacedKey NAMESPACED_KEY = new NamespacedKey(JavaPlugin.getProvidingPlugin(SongChooseInventoryHoler.class), "inventory_choose_song");
 
+    private final ConfigYML.SongChooseInventory configInventory;
     private final Game game;
     private final Inventory inventory;
 
-    public SongChooseInventoryHoler(JavaPlugin javaPlugin, Game game) {
-        this.inventory = javaPlugin.getServer().createInventory(this, 27, "Choose song");
+    public SongChooseInventoryHoler(JavaPlugin javaPlugin, ConfigManager configManager, Game game) {
+        this.configInventory = configManager.getConfig().inventories().songChooseInventory();
+        this.inventory = javaPlugin.getServer().createInventory(this, this.configInventory.size(), "Choose song");
         this.game = game;
         NBSFile first = game.getNonPlayedPlaylist().getFirst();
         List<NBSFile> songs = new ArrayList<>();
         songs.add(first);
-        fillWithRandomSongs(songs);
+        int songOptionsCount = configManager.getConfig().settings().songOptionsCount();
+        fillWithRandomSongs(songs, songOptionsCount);
 
-        this.inventory.setItem(4, new ItemStack(Material.CLOCK));
+        this.inventory.setItem(this.configInventory.timeLeftItem().slot(), new ItemStack(this.configInventory.timeLeftItem().material()));
 
-        this.inventory.setItem(10, getSongItem(1, songs.get(0)));
-        this.inventory.setItem(12, getSongItem(2, songs.get(1)));
-        this.inventory.setItem(14, getSongItem(3, songs.get(2)));
-        this.inventory.setItem(16, getSongItem(4, songs.get(3)));
+        for (int i = 0; i < songOptionsCount; i++)
+            this.inventory.setItem(this.configInventory.songItem().slots().get(i), getSongItem(i + 1, songs.get(i)));
 
-        ItemStack placeholderItemStack = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta placeholderItemMeta = placeholderItemStack.getItemMeta();
-        if (placeholderItemMeta != null) {
-            placeholderItemMeta.setDisplayName(" ");
-            placeholderItemStack.setItemMeta(placeholderItemMeta);
+        ItemStack fillerItemStack = new ItemStack(this.configInventory.fillerItem().material());
+        ItemMeta fillerItemMeta = fillerItemStack.getItemMeta();
+        if (fillerItemMeta != null) {
+            fillerItemMeta.setDisplayName(" ");
+            fillerItemStack.setItemMeta(fillerItemMeta);
         }
 
         for (int i = 0; i < this.inventory.getSize(); i++) {
             if (this.inventory.getItem(i) != null) continue;
-            this.inventory.setItem(i, placeholderItemStack);
+            this.inventory.setItem(i, fillerItemStack);
         }
     }
 
     private ItemStack getSongItem(int id, NBSFile song) {
-        ItemStack itemStack = new ItemStack(Material.MUSIC_DISC_5);
+        ItemStack itemStack = new ItemStack(this.configInventory.songItem().material());
 
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (itemMeta != null) {
@@ -76,7 +78,7 @@ public class SongChooseInventoryHoler implements InventoryHolder {
         return itemStack;
     }
 
-    private void fillWithRandomSongs(List<NBSFile> songs) {
+    private void fillWithRandomSongs(List<NBSFile> songs, int amount) {
         // 1. Filter available songs (O(n))
         List<NBSFile> availableSongs = this.game.getPlaylist().stream()
                 .filter(song -> !songs.contains(song))
@@ -86,7 +88,7 @@ public class SongChooseInventoryHoler implements InventoryHolder {
 
         // 2. Pick random elements specifically instead of shuffling everything
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        int songsToAdd = Math.min(3, availableSongs.size());
+        int songsToAdd = Math.min(amount, availableSongs.size());
 
         for (int i = 0; i < songsToAdd; i++) {
             // Swap a random element to the current position (Partial Shuffle)
@@ -102,9 +104,9 @@ public class SongChooseInventoryHoler implements InventoryHolder {
     }
 
     public void setTimeLeft(int timeLeft) {
-        ItemStack timerItemStack = this.inventory.getItem(4);
+        ItemStack timerItemStack = this.inventory.getItem(this.configInventory.timeLeftItem().slot());
         if (timerItemStack == null) return;
-        timerItemStack = timerItemStack.clone();
+        //timerItemStack = timerItemStack.clone();
         timerItemStack.setAmount(timeLeft);
         ItemMeta timerItemMeta = timerItemStack.getItemMeta();
         if (timerItemMeta != null) {
@@ -117,7 +119,7 @@ public class SongChooseInventoryHoler implements InventoryHolder {
             ));
             timerItemStack.setItemMeta(timerItemMeta);
         }
-        this.inventory.setItem(4, timerItemStack);
+        //this.inventory.setItem(this.configInventory.timeLeftItem().slot(), timerItemStack);
     }
 
     @Override
@@ -127,6 +129,6 @@ public class SongChooseInventoryHoler implements InventoryHolder {
     }
 
     public Game getGame() {
-        return game;
+        return this.game;
     }
 }

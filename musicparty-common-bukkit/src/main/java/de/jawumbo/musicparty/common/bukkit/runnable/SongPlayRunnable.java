@@ -2,6 +2,7 @@ package de.jawumbo.musicparty.common.bukkit.runnable;
 
 import de.jawumbo.musicparty.common.bukkit.game.Game;
 import de.jawumbo.musicparty.common.bukkit.inventoryholder.SongChooseInventoryHoler;
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
 import de.jawumbo.musicparty.common.bukkit.nbs.NBSPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -13,46 +14,45 @@ import java.util.UUID;
 
 public class SongPlayRunnable extends BukkitRunnable {
 
-    private final static int SONG_PLAY_TIME = 20 * 30;
-
     private final JavaPlugin javaPlugin;
+    private final ConfigManager configManager;
     private final Game game;
-    private BukkitTask nbsPlayerTask;
 
+    private final int playTime;
+    private BukkitTask nbsPlayerTask;
     private int currentTick;
 
-    public SongPlayRunnable(JavaPlugin javaPlugin, Game game) {
+    public SongPlayRunnable(JavaPlugin javaPlugin, ConfigManager configManager, Game game) {
         this.javaPlugin = javaPlugin;
+        this.configManager = configManager;
         this.game = game;
+        this.playTime = 20 * configManager.getConfig().settings().playDurationSeconds();
     }
 
     @Override
     public void run() {
-        switch (this.currentTick++) {
-            case 0 -> {
-                this.game.setPunishable(true);
-                this.nbsPlayerTask = new NBSPlayer(this.game.getNonPlayedPlaylist().getFirst(), this.game.getPlayers(), this.javaPlugin)
-                        .runTaskTimer(this.javaPlugin, 1, 1);
+        int i = this.currentTick++;
+        if (i == 0) {
+            this.game.setPunishable(true);
+            this.nbsPlayerTask = new NBSPlayer(this.game.getNonPlayedPlaylist().getFirst(), this.game.getPlayers(), this.javaPlugin, this.configManager)
+                    .runTaskTimer(this.javaPlugin, 1, 1);
+        } else if (i == this.playTime) {
+            cancel();
+            this.nbsPlayerTask.cancel();
+            Inventory inventory = new SongChooseInventoryHoler(this.javaPlugin, this.configManager, this.game).getInventory();
+            for (UUID playerUUID : this.game.getPlayers()) {
+                Player player = this.javaPlugin.getServer().getPlayer(playerUUID);
+                if (player == null) continue;
+                player.sendExperienceChange(player.getExp(), player.getLevel());
+                player.openInventory(inventory);
             }
-            case SONG_PLAY_TIME -> {
-                cancel();
-                this.nbsPlayerTask.cancel();
-                Inventory inventory = new SongChooseInventoryHoler(this.javaPlugin, this.game).getInventory();
-                for (UUID playerUUID : this.game.getPlayers()) {
-                    Player player = this.javaPlugin.getServer().getPlayer(playerUUID);
-                    if (player == null) continue;
-                    player.sendExperienceChange(player.getExp(), player.getLevel());
-                    player.openInventory(inventory);
-                }
-                this.game.setCurrentTask(new SongChooseRunnable(this.javaPlugin, this.game).runTaskTimer(this.javaPlugin, 1, 1));
-            }
-            default -> {
-                float progress = (float) (SONG_PLAY_TIME - currentTick) / SONG_PLAY_TIME;
-                for (UUID playerUUID : this.game.getPlayers()) {
-                    Player player = this.javaPlugin.getServer().getPlayer(playerUUID);
-                    if (player == null) continue;
-                    player.sendExperienceChange(progress, (SONG_PLAY_TIME - currentTick) / 20);
-                }
+            this.game.setCurrentTask(new SongChooseRunnable(this.javaPlugin, this.configManager, this.game).runTaskTimer(this.javaPlugin, 1, 1));
+        } else {
+            float progress = (float) (this.playTime - currentTick) / this.playTime;
+            for (UUID playerUUID : this.game.getPlayers()) {
+                Player player = this.javaPlugin.getServer().getPlayer(playerUUID);
+                if (player == null) continue;
+                player.sendExperienceChange(progress, (this.playTime - currentTick) / 20);
             }
         }
     }

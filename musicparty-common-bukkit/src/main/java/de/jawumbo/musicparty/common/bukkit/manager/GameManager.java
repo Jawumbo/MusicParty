@@ -11,19 +11,22 @@ import java.util.UUID;
 public class GameManager {
 
     private final JavaPlugin javaPlugin;
+    private final ConfigManager configManager;
     private final SongManager songManager;
     private final Map<UUID, SingleplayerGame> singleplayerGames;
 
-    public GameManager(JavaPlugin javaPlugin, SongManager songManager) {
+    public GameManager(JavaPlugin javaPlugin, ConfigManager configManager, SongManager songManager) {
         this.javaPlugin = javaPlugin;
+        this.configManager = configManager;
         this.singleplayerGames = new HashMap<>();
         this.songManager = songManager;
     }
 
     public boolean joinSinglemodeGame(UUID playerUUID) {
         if (isPlaying(playerUUID)) return false;
-        if (songManager.getNbsFiles().size() < 4) return false;
-        this.singleplayerGames.put(playerUUID, new SingleplayerGame(playerUUID, this.javaPlugin, this.songManager));
+        if (this.songManager.getNbsFiles().size() < this.configManager.getConfig().settings().songOptionsCount())
+            return false;
+        this.singleplayerGames.put(playerUUID, new SingleplayerGame(playerUUID, this.javaPlugin, this.configManager, this.songManager));
         return true;
     }
 
