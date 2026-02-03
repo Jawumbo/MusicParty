@@ -17,7 +17,12 @@ public class MusicPartyPaper extends JavaPlugin {
     public void onEnable() {
         this.musicPartyCommonBukkit.onEnable();
 
-        new MusicPartyCommand(this, this.musicPartyCommonBukkit.getGameManager(), this.musicPartyCommonBukkit.getSongManager());
+        new MusicPartyCommand(
+                this,
+                this.musicPartyCommonBukkit.getConfigManager(),
+                this.musicPartyCommonBukkit.getGameManager(),
+                this.musicPartyCommonBukkit.getSongManager()
+        );
     }
 
     @Override

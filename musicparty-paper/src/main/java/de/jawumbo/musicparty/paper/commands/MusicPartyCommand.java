@@ -1,5 +1,6 @@
 package de.jawumbo.musicparty.paper.commands;
 
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
 import de.jawumbo.musicparty.common.bukkit.manager.GameManager;
 import de.jawumbo.musicparty.common.bukkit.manager.SongManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -18,6 +19,7 @@ import static net.kyori.adventure.text.Component.text;
 
 public class MusicPartyCommand {
 
+    private final ConfigManager configManager;
     private final GameManager gameManager;
     private final SongManager songManager;
 
@@ -27,7 +29,8 @@ public class MusicPartyCommand {
             .append(text("] ", NamedTextColor.DARK_GRAY))
             .build();
 
-    public MusicPartyCommand(JavaPlugin plugin, GameManager gameManager, SongManager songManager) {
+    public MusicPartyCommand(JavaPlugin plugin, ConfigManager configManager, GameManager gameManager, SongManager songManager) {
+        this.configManager = configManager;
         this.gameManager = gameManager;
         this.songManager = songManager;
 
@@ -117,7 +120,7 @@ public class MusicPartyCommand {
             return;
         }
 
-        if (this.songManager.getNbsFiles().size() < 4) {
+        if (this.songManager.getNbsFiles().size() < this.configManager.getConfig().settings().songOptionsCount()) {
             player.sendMessage(prefix.append(text("Not enough songs available! At least 4 songs are required.", NamedTextColor.RED)));
             return;
         }

@@ -77,6 +77,11 @@
                 <artifactId>paper-api</artifactId>
                 <version>${plugin.version.bukkit-api}</version>
             </dependency>
+            <dependency>
+                <groupId>org.spongepowered</groupId>
+                <artifactId>configurate-yaml</artifactId>
+                <version>4.2.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -18,7 +18,7 @@ public class NBSParser {
         short firstValue = buffer.getShort();
 
         if (firstValue == 0) {
-            // versionen (1-5)
+            // version 1-5
             nbs.nbsVersion = buffer.get();
             nbs.vanillaInstrumentCount = buffer.get();
             nbs.songLength = buffer.getShort();
@@ -140,7 +140,7 @@ public class NBSParser {
             // formula: 2^((Key - 45 + Offset + Cent/100) / 12)
             note.calculatedPitch = (float) Math.pow(2, (note.key - 45 + instOffset + (note.pitch / 100.0)) / 12.0);
 
-            // Sound vorberechnen
+            // prepare song
             if (note.instrument < 16) {
                 note.calculatedSound = NBSInstrument.getSoundName(note.instrument);
             } else {

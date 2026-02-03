@@ -1,5 +1,6 @@
 package de.jawumbo.musicparty.spigot.commands;
 
+import de.jawumbo.musicparty.common.bukkit.manager.ConfigManager;
 import de.jawumbo.musicparty.common.bukkit.manager.GameManager;
 import de.jawumbo.musicparty.common.bukkit.manager.SongManager;
 import org.bukkit.command.Command;
@@ -22,10 +23,12 @@ import java.util.stream.Stream;
  */
 public class MusicPartyCommand implements TabExecutor {
 
+    private final ConfigManager configManager;
     private final GameManager gameManager;
     private final SongManager songManager;
 
-    public MusicPartyCommand(JavaPlugin javaPlugin, GameManager gameManager, SongManager songManager) {
+    public MusicPartyCommand(JavaPlugin javaPlugin, ConfigManager configManager, GameManager gameManager, SongManager songManager) {
+        this.configManager = configManager;
         this.gameManager = gameManager;
         this.songManager = songManager;
 
@@ -65,7 +68,7 @@ public class MusicPartyCommand implements TabExecutor {
                     sender.sendMessage("§8[§bMusicParty§8] §cYou are already playing!");
                     return true;
                 }
-                if (this.songManager.getNbsFiles().size() < 4) {
+                if (this.songManager.getNbsFiles().size() < this.configManager.getConfig().settings().songOptionsCount()) {
                     sender.sendMessage("§8[§bMusicParty§8] §cNot enough songs available! At least 4 songs are required.");
                     return true;
                 }
