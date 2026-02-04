@@ -5,7 +5,8 @@ MusicParty is a free & open-source Minecraft **music quiz** plugin for **Paper**
 song (from `.nbs` files), then you have to guess the correct track from 4 options via a GUI.
 
 Repository: https://github.com/Jawumbo/MusicParty
-
+Modrinth: https://modrinth.com/plugin/musicparty
+CurseForge: https://www.curseforge.com/minecraft/bukkit-plugins/musicparty
 ---
 
 ## Features
