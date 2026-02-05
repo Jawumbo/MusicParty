@@ -18,12 +18,6 @@
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <name>Jawumbo</name>
-        </developer>
-    </developers>
-
     <modules>
         <module>musicparty-common-bukkit</module>
         <module>musicparty-spigot</module>
@@ -50,6 +44,7 @@
         <plugin.version.bukkit-api>${plugin.version.api}-R0.1-SNAPSHOT</plugin.version.bukkit-api>
         <plugin.name>MusicParty</plugin.name>
         <plugin.website>https://github.com/Jawumbo/MusicParty</plugin.website>
+        <plugin.authors>["Jawumbo"]</plugin.authors>
 
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -123,48 +118,17 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-license</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${maven.multiModuleProjectDirectory}</directory>
-                                    <includes>
-                                        <include>LICENSE</include>
-                                    </includes>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <version>2.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>
-                                def list = project.developers.collect { "\"${it.name}\"" }.join(', ')
-                                project.properties['plugin.authors'] = "[" + list + "]"
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>META-INF/*.SF</exclude>
+                        <exclude>META-INF/*.DSA</exclude>
+                        <exclude>META-INF/*.RSA</exclude>
+                        <exclude>META-INF/*.EC</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
